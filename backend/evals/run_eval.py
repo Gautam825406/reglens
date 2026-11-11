@@ -6,6 +6,7 @@ Four-way ablation on the same golden set:
 Metrics: context precision, context recall, faithfulness, answer relevancy,
 correct abstention. Run: python -m evals.run_eval  (from backend/)
 """
+import asyncio
 import json
 import os
 import sys
@@ -15,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.database import SessionLocal, init_db  # noqa: E402
 from app import models  # noqa: E402
 from app.faithfulness import check_answer  # noqa: E402
-from app.generation import extractive_answer  # noqa: E402
+from app.generation import extractive_answer, generate_answer  # noqa: E402
 from app.retrieval import ABSTAIN_COVERAGE_THRESHOLD, ABSTAIN_TOP_SCORE_THRESHOLD, retrieve  # noqa: E402
 from app.seed import seed_demo  # noqa: E402
 
@@ -43,7 +44,7 @@ def resolve_expected(db, case) -> set[str]:
     return ids
 
 
-def run_all(db=None, user=None) -> dict:
+def run_all(db=None, user=None, out_path=None) -> dict:
     own_db = db is None
     if own_db:
         init_db()
@@ -85,7 +86,13 @@ def run_all(db=None, user=None) -> dict:
                 recalls.append(0.0)
                 mrrs.append(0.0)
             if retrieved and not abstained:
-                gen = extractive_answer(case["question"], retrieved)
+                if os.environ.get("GROQ_API_KEY"):
+                    # LLM mode: score the real generated answer, not the
+                    # extractive fallback, so faithfulness measures what
+                    # users actually see. Retrieval is identical either way.
+                    gen = asyncio.run(generate_answer(case["question"], retrieved))
+                else:
+                    gen = extractive_answer(case["question"], retrieved)
                 check = check_answer(gen["claims"], {r["clause_id"]: r["text"] for r in retrieved})
                 faiths.append(check["faithfulness"])
                 q_terms = set(case["question"].lower().split())
@@ -124,7 +131,7 @@ def run_all(db=None, user=None) -> dict:
               "note": "Scores computed by the real retrieval + faithfulness code on the golden set. "
                       "hybrid+rerank adds the overlap re-rank bonus; "
                       "graph adds AMENDS/SUPERSEDES/REFERENCES traversal."}
-    with open(RESULTS_PATH, "w") as f:
+    with open(out_path or RESULTS_PATH, "w") as f:
         json.dump(result, f, indent=2)
     if own_db:
         db.close()

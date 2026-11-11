@@ -1,0 +1,56 @@
+{
+  "dataset": "golden-v1",
+  "n_cases": 47,
+  "answerable": 39,
+  "unanswerable": 8,
+  "mode": "llm",
+  "ablation": {
+    "vector-only": {
+      "n_answerable": 39,
+      "n_abstention": 8,
+      "context_precision@5": 0.205,
+      "context_recall@5": 0.782,
+      "mrr": 0.626,
+      "faithfulness": 0.59,
+      "answer_relevancy": 0.441,
+      "correct_abstention_rate": 0.875
+    },
+    "vector+bm25": {
+      "n_answerable": 39,
+      "n_abstention": 8,
+      "context_precision@5": 0.226,
+      "context_recall@5": 0.872,
+      "mrr": 0.679,
+      "faithfulness": 0.897,
+      "answer_relevancy": 0.503,
+      "correct_abstention_rate": 0.875
+    },
+    "hybrid+rerank": {
+      "n_answerable": 39,
+      "n_abstention": 8,
+      "context_precision@5": 0.226,
+      "context_recall@5": 0.872,
+      "mrr": 0.682,
+      "faithfulness": 0.897,
+      "answer_relevancy": 0.518,
+      "correct_abstention_rate": 0.875
+    },
+    "hybrid+graph": {
+      "n_answerable": 39,
+      "n_abstention": 8,
+      "context_precision@5": 0.231,
+      "context_recall@5": 0.897,
+      "mrr": 0.72,
+      "faithfulness": 0.923,
+      "answer_relevancy": 0.503,
+      "correct_abstention_rate": 0.875
+    }
+  },
+  "per_category_context_recall_hybrid_graph": {
+    "conflict": 1.0,
+    "cross-document": 1.0,
+    "single-clause": 1.0,
+    "temporal": 0.8
+  },
+  "note": "Scores computed by the real retrieval + faithfulness code on the golden set. hybrid+rerank adds the overlap re-rank bonus; graph adds AMENDS/SUPERSEDES/REFERENCES traversal."
+}

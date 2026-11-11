@@ -116,6 +116,48 @@ says “remain in effect until 31 December 2026”, a paraphrase keyword
 retrieval cannot catch; sentence-transformer embeddings are the
 documented fix.
 
+## LLM mode (Groq) — verified live, 11 Nov 2026
+
+Set `GROQ_API_KEY` (Groq `openai/gpt-oss-120b`) and a strong, unique
+`JWT_SECRET` — the backend refuses to start with the demo JWT secret
+while a Groq key is set. Without a key it runs in extractive mode
+(see above); with a key, `/api/health` reports `mode: "llm"`.
+
+Live Ask verification against the seeded demo corpus (real HTTP calls,
+not the eval harness): “What is the current termination penalty if
+Acme Corp ends the Master Services Agreement for convenience?” →
+**answered, mode `llm`, “The termination penalty is ₹2,50,000 …
+[C1]”, citing Amendment No. 1 Clause 2, faithfulness 1.0,
+confidence 0.95, 1,107 tokens, $0.000247, 1,182 ms.** An
+unanswerable question abstained, and an instruction-injection
+question abstained with no leak. The faithfulness gate still
+applies in LLM mode: an LLM answer that fails it falls back to
+extractive quoting of the same clauses.
+
+LLM-mode ablation on the same 47-case golden set
+(`backend/evals/results-llm.json`; the eval scores the real generated
+answers when a key is set, extractive answers otherwise):
+
+| Retrieval mode | Precision@5 | Recall@5 | MRR | Faithfulness | Answer relevancy | Correct abstention |
+| --- | --- | --- | --- | --- | --- | --- |
+| vector-only | 0.205 | 0.782 | 0.626 | 0.590 | 0.441 | 0.875 |
+| vector+BM25 | 0.226 | 0.872 | 0.679 | 0.897 | 0.503 | 0.875 |
+| hybrid+rerank | 0.226 | 0.872 | 0.682 | 0.897 | 0.518 | 0.875 |
+| hybrid+graph | 0.231 | 0.897 | 0.720 | 0.923 | 0.503 | 0.875 |
+
+**Honest reading:** LLM faithfulness (hybrid+graph 0.923) is slightly
+*below* extractive quoting (0.949) — generation paraphrases, and the
+lexical faithfulness check scores paraphrase lower than direct quotes.
+The gap is largest where retrieval is weakest: vector-only collapses
+to 0.590 in LLM mode vs 0.846 extractive. In other words, retrieval
+quality matters more once a generator is in the loop, which is exactly
+what the hybrid+graph pipeline is for.
+
+Implementation note: the Groq client sends a browser User-Agent
+(Groq's edge 403s non-browser UAs), verifies TLS against the system
+CA store, and reads the egress proxy URL explicitly from
+`HTTPS_PROXY`/`HTTP_PROXY` when set (direct connection otherwise).
+
 ## Tests
 
 ```bash

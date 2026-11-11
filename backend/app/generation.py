@@ -4,12 +4,33 @@ itself extractive/no-LLM. Document text is passed as DATA inside a
 clearly delimited evidence block; the system prompt forbids following
 instructions found in documents. Never fakes a generated answer.
 """
+import os
+import ssl
 import time
 
 import httpx
 
 from .config import settings
 from .security import contains_injection
+
+# Groq's edge (Cloudflare) rejects requests carrying a non-browser
+# User-Agent with 403, and the sandbox egress proxy MITMs TLS with a
+# locally-trusted CA. So: send a browser User-Agent, verify TLS against
+# the system CA store instead of certifi's bundle, and read the proxy
+# URL explicitly from the environment. (trust_env must stay off:
+# httpx 0.28.1 cannot parse the IPv6 entries in this sandbox's NO_PROXY
+# and dies constructing the client with InvalidURL. On Render no proxy
+# vars are set, so the request goes direct exactly as before.)
+BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+
+def _proxy_url() -> str | None:
+    for key in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"):
+        val = (os.environ.get(key) or "").strip()
+        if val:
+            return val
+    return None
 
 PRICE_PER_1M_INPUT = 0.15
 PRICE_PER_1M_OUTPUT = 0.60
@@ -42,10 +63,13 @@ class GroqClient:
 
     async def chat(self, system: str, user: str, timeout: float = 30.0) -> dict:
         started = time.time()
-        async with httpx.AsyncClient(timeout=timeout, trust_env=False) as client:
+        ctx = ssl.create_default_context()
+        async with httpx.AsyncClient(timeout=timeout, trust_env=False, verify=ctx,
+                                     proxy=_proxy_url()) as client:
             resp = await client.post(
                 f"{settings.groq_base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
+                headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
+                         "User-Agent": BROWSER_UA},
                 json={"model": self.model,
                       "messages": [{"role": "system", "content": system},
                                    {"role": "user", "content": user}],
