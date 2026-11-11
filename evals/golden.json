@@ -1,0 +1,710 @@
+{
+  "version": "golden-v1",
+  "cases": [
+    {
+      "id": "S01",
+      "category": "single-clause",
+      "question": "What is the monthly fee Acme Corp pays under the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "4"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the monthly fee Acme Corp pays under the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "S02",
+      "category": "single-clause",
+      "question": "How much interest applies to late payment under the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "4"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "How much interest applies to late payment under the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "S03",
+      "category": "single-clause",
+      "question": "What is the aggregate liability cap in the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "7"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the aggregate liability cap in the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "S04",
+      "category": "single-clause",
+      "question": "Which law governs the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "8"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Which law governs the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "S05",
+      "category": "single-clause",
+      "question": "What service availability must Nimbus Technologies maintain under the IT Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What service availability must Nimbus Technologies maintain under the IT Services Agreement?"
+      ]
+    },
+    {
+      "id": "S06",
+      "category": "single-clause",
+      "question": "How much does Acme Corp pay per month under the IT Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "How much does Acme Corp pay per month under the IT Services Agreement?"
+      ]
+    },
+    {
+      "id": "S07",
+      "category": "single-clause",
+      "question": "Within how many days must Delta Foods deliver goods after a purchase order?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Within how many days must Delta Foods deliver goods after a purchase order?"
+      ]
+    },
+    {
+      "id": "S08",
+      "category": "single-clause",
+      "question": "What is the late payment penalty under the Supply Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the late payment penalty under the Supply Agreement?"
+      ]
+    },
+    {
+      "id": "S09",
+      "category": "single-clause",
+      "question": "How often may Acme Corp audit Nimbus Technologies under the IT Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "6"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "How often may Acme Corp audit Nimbus Technologies under the IT Services Agreement?"
+      ]
+    },
+    {
+      "id": "S10",
+      "category": "single-clause",
+      "question": "What must Delta Foods do about defective goods?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "4"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What must Delta Foods do about defective goods?"
+      ]
+    },
+    {
+      "id": "S11",
+      "category": "single-clause",
+      "question": "How often must a regulated entity be able to audit its IT service provider under the RBI circular?",
+      "expected": [
+        {
+          "doc_title_contains": "RBI Circular",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "How often must a regulated entity be able to audit its IT service provider under the RBI circular?"
+      ]
+    },
+    {
+      "id": "S12",
+      "category": "single-clause",
+      "question": "Within how many hours must a service provider report a material security incident under the RBI circular?",
+      "expected": [
+        {
+          "doc_title_contains": "RBI Circular",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Within how many hours must a service provider report a material security incident under the RBI circular?"
+      ]
+    },
+    {
+      "id": "X01",
+      "category": "cross-document",
+      "question": "What are the termination penalties across all vendor contracts?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        },
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What are the termination penalties across all vendor contracts?"
+      ]
+    },
+    {
+      "id": "X02",
+      "category": "cross-document",
+      "question": "Which contracts require Acme Corp to pay Nimbus Technologies, and how much?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "4"
+        },
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Which contracts require Acme Corp to pay Nimbus Technologies, and how much?"
+      ]
+    },
+    {
+      "id": "X03",
+      "category": "cross-document",
+      "question": "What notice periods apply for termination across the vendor contracts?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        },
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "5"
+        },
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What notice periods apply for termination across the vendor contracts?"
+      ]
+    },
+    {
+      "id": "X04",
+      "category": "cross-document",
+      "question": "Which documents give Acme Corp audit rights over Nimbus Technologies?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "6"
+        },
+        {
+          "doc_title_contains": "RBI Circular",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Which documents give Acme Corp audit rights over Nimbus Technologies?"
+      ]
+    },
+    {
+      "id": "X05",
+      "category": "cross-document",
+      "question": "What are the late payment penalties across the contracts?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "4"
+        },
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What are the late payment penalties across the contracts?"
+      ]
+    },
+    {
+      "id": "X06",
+      "category": "cross-document",
+      "question": "Which parties are bound by termination penalty clauses?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        },
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Which parties are bound by termination penalty clauses?"
+      ]
+    },
+    {
+      "id": "T01",
+      "category": "temporal",
+      "question": "What is the current termination penalty if Acme Corp ends the Master Services Agreement for convenience?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the current termination penalty if Acme Corp ends the Master Services Agreement for convenience?"
+      ]
+    },
+    {
+      "id": "T02",
+      "category": "temporal",
+      "question": "What was the original termination penalty in the Master Services Agreement before it was amended?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What was the original termination penalty in the Master Services Agreement before it was amended?"
+      ]
+    },
+    {
+      "id": "T03",
+      "category": "temporal",
+      "question": "What is the current notice period for terminating the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the current notice period for terminating the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "T04",
+      "category": "temporal",
+      "question": "When did the amendment to the Master Services Agreement take effect?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "0"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "When did the amendment to the Master Services Agreement take effect?"
+      ]
+    },
+    {
+      "id": "T05",
+      "category": "temporal",
+      "question": "When does the Master Services Agreement expire?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "When does the Master Services Agreement expire?"
+      ]
+    },
+    {
+      "id": "T06",
+      "category": "temporal",
+      "question": "When does the Supply Agreement expire?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "0"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "When does the Supply Agreement expire?"
+      ]
+    },
+    {
+      "id": "C01",
+      "category": "conflict",
+      "question": "Do the Acme Corp contracts agree on the termination penalty?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        },
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Do the Acme Corp contracts agree on the termination penalty?"
+      ]
+    },
+    {
+      "id": "C02",
+      "category": "conflict",
+      "question": "Is there a conflict between the termination penalties for Acme Corp across its contracts with Nimbus?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        },
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Is there a conflict between the termination penalties for Acme Corp across its contracts with Nimbus?"
+      ]
+    },
+    {
+      "id": "C03",
+      "category": "conflict",
+      "question": "What termination penalty does the IT Services Agreement impose on Acme Corp?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What termination penalty does the IT Services Agreement impose on Acme Corp?"
+      ]
+    },
+    {
+      "id": "U01",
+      "category": "unanswerable",
+      "question": "What is the arbitration venue for disputes under the Master Services Agreement?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What is the arbitration venue for disputes under the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "U02",
+      "category": "unanswerable",
+      "question": "What is the data retention period under GDPR in these contracts?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What is the data retention period under GDPR in these contracts?"
+      ]
+    },
+    {
+      "id": "U03",
+      "category": "unanswerable",
+      "question": "What insurance coverage must Nimbus Technologies maintain?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What insurance coverage must Nimbus Technologies maintain?"
+      ]
+    },
+    {
+      "id": "U04",
+      "category": "unanswerable",
+      "question": "What is the force majeure clause in the Supply Agreement?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What is the force majeure clause in the Supply Agreement?"
+      ]
+    },
+    {
+      "id": "U05",
+      "category": "unanswerable",
+      "question": "What are the subcontracting restrictions in the IT Services Agreement?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What are the subcontracting restrictions in the IT Services Agreement?"
+      ]
+    },
+    {
+      "id": "U06",
+      "category": "unanswerable",
+      "question": "What is the price escalation formula for the monthly fee?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What is the price escalation formula for the monthly fee?"
+      ]
+    },
+    {
+      "id": "U07",
+      "category": "unanswerable",
+      "question": "Which court has jurisdiction over the Supply Agreement?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "Which court has jurisdiction over the Supply Agreement?"
+      ]
+    },
+    {
+      "id": "U08",
+      "category": "unanswerable",
+      "question": "What is the intellectual property ownership clause in the Master Services Agreement?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What is the intellectual property ownership clause in the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "R01",
+      "category": "single-clause",
+      "question": "Where must customer data be stored under the RBI circular?",
+      "expected": [
+        {
+          "doc_title_contains": "RBI Circular",
+          "clause_no": "4"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Where must customer data be stored under the RBI circular?"
+      ]
+    },
+    {
+      "id": "R02",
+      "category": "single-clause",
+      "question": "What termination notice must a contract with a critical vendor allow under the RBI circular?",
+      "expected": [
+        {
+          "doc_title_contains": "RBI Circular",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What termination notice must a contract with a critical vendor allow under the RBI circular?"
+      ]
+    },
+    {
+      "id": "R03",
+      "category": "single-clause",
+      "question": "What confidentiality duty do the parties owe each other under the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What confidentiality duty do the parties owe each other under the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "R04",
+      "category": "single-clause",
+      "question": "What happens to outstanding payments when the Supply Agreement is terminated?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "5"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What happens to outstanding payments when the Supply Agreement is terminated?"
+      ]
+    },
+    {
+      "id": "R05",
+      "category": "single-clause",
+      "question": "What discount applies for late delivery under the Supply Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What discount applies for late delivery under the Supply Agreement?"
+      ]
+    },
+    {
+      "id": "R06",
+      "category": "single-clause",
+      "question": "What service credits apply if Nimbus misses service levels under the IT Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What service credits apply if Nimbus misses service levels under the IT Services Agreement?"
+      ]
+    },
+    {
+      "id": "R07",
+      "category": "single-clause",
+      "question": "Within how many days must Nimbus pay Delta Foods after delivery?",
+      "expected": [
+        {
+          "doc_title_contains": "Supply Agreement",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Within how many days must Nimbus pay Delta Foods after delivery?"
+      ]
+    },
+    {
+      "id": "R08",
+      "category": "single-clause",
+      "question": "What data protection duties does Nimbus Technologies owe Acme Corp?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "4"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What data protection duties does Nimbus Technologies owe Acme Corp?"
+      ]
+    },
+    {
+      "id": "R09",
+      "category": "single-clause",
+      "question": "What reports must Nimbus Technologies deliver to Acme Corp under the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "2"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What reports must Nimbus Technologies deliver to Acme Corp under the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "R10",
+      "category": "single-clause",
+      "question": "What is the monthly fee and payment deadline in the Master Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "Master Services Agreement",
+          "clause_no": "4"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the monthly fee and payment deadline in the Master Services Agreement?"
+      ]
+    },
+    {
+      "id": "R11",
+      "category": "cross-document",
+      "question": "Which contracts mention a 30-day notice period?",
+      "expected": [
+        {
+          "doc_title_contains": "Amendment No. 1",
+          "clause_no": "2"
+        },
+        {
+          "doc_title_contains": "RBI Circular",
+          "clause_no": "3"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "Which contracts mention a 30-day notice period?"
+      ]
+    },
+    {
+      "id": "R12",
+      "category": "single-clause",
+      "question": "What is the expiry date of the IT Services Agreement?",
+      "expected": [
+        {
+          "doc_title_contains": "IT Services Agreement",
+          "clause_no": "0"
+        }
+      ],
+      "abstain": false,
+      "points": [
+        "What is the expiry date of the IT Services Agreement?"
+      ]
+    }
+  ]
+}

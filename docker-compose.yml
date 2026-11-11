@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: reglens
+      POSTGRES_PASSWORD: reglens-dev-password
+      POSTGRES_DB: reglens
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    # Reserved as the Celery broker for the ingestion scale path (see
+    # backend/app/worker.py). v1 ingestion runs in-process / via DB polling.
+  api:
+    build: ./backend
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      DATABASE_URL: postgresql://reglens:reglens-dev-password@postgres:5432/reglens
+      JWT_SECRET: ${JWT_SECRET:-reglens-demo-secret-change-me-before-live-use}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+  worker:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://reglens:reglens-dev-password@postgres:5432/reglens
+      JWT_SECRET: ${JWT_SECRET:-reglens-demo-secret-change-me-before-live-use}
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      - postgres
+      - api
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
