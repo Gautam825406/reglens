@@ -1,5 +1,7 @@
 # RegLens — Grounded GraphRAG for Contracts & Compliance
 
+**🔴 Live Demo:** [reglens-chi.vercel.app](https://reglens-chi.vercel.app/) · **Backend:** [reglens-backend-wg7u.onrender.com](https://reglens-backend-wg7u.onrender.com) (Render free tier — first load can take ~50s) · **Measured (48-case golden set, 11 Nov 2026):** recall@5 0.897 · faithfulness 0.974 · correct abstention 9/9
+
 > **Understand Every Clause. Trust Every Answer.**
 
 RegLens reads contracts, policies and regulatory circulars as a structured
