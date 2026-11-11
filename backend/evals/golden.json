@@ -1,5 +1,5 @@
 {
-  "version": "golden-v1",
+  "version": "golden-v1.1",
   "cases": [
     {
       "id": "S01",
@@ -521,6 +521,17 @@
       "points": [
         "What is the intellectual property ownership clause in the Master Services Agreement?"
       ]
+    },
+    {
+      "id": "U09",
+      "category": "unanswerable",
+      "question": "What is the penalty for late delivery of quantum computers?",
+      "expected": [],
+      "abstain": true,
+      "points": [
+        "What is the penalty for late delivery of quantum computers?"
+      ],
+      "note": "Live failure 11 Nov 2026: answered at 0.98 confidence from penalty/late-delivery clauses although quantum computers appear nowhere in the corpus. Guards the novel-share abstention rule."
     },
     {
       "id": "R01",

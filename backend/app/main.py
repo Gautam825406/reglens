@@ -432,13 +432,25 @@ async def ask(body: AskIn, request: Request, user: models.User = Depends(get_cur
     retrieved = retrieve(db, user, question, collection_ids=body.collection_ids, top_k=body.top_k,
                          modes=("vector", "bm25", "graph", "rerank"))
     latency_ms = int((time.time() - started) * 1000)
-    from .retrieval import ABSTAIN_COVERAGE_THRESHOLD, ABSTAIN_TOP_SCORE_THRESHOLD
+    from .retrieval import (ABSTAIN_COVERAGE_THRESHOLD, ABSTAIN_NOVEL_SHARE_THRESHOLD,
+                          ABSTAIN_TOP_SCORE_THRESHOLD, apply_document_scope, question_novelty)
+    # A question naming a document is answered from that document (and
+    # its amendments) only — never from an unrelated agreement. (Must
+    # run after the import above: function-local imports bind the names
+    # as locals, so using one before its import line is UnboundLocalError.)
+    retrieved = apply_document_scope(db, question, retrieved)
     if retrieved and retrieved[0]["score"] < ABSTAIN_TOP_SCORE_THRESHOLD:
         # Best clause is not really about the question: abstain rather
         # than quote irrelevant clauses as if they answered it.
         retrieved = []
     if retrieved and max(c.get("coverage", 0) for c in retrieved[:3]) < ABSTAIN_COVERAGE_THRESHOLD:
         # The question's distinctive terms appear in no retrieved clause.
+        retrieved = []
+    if retrieved and question_novelty(db, user, question,
+                                      collection_ids=body.collection_ids) > ABSTAIN_NOVEL_SHARE_THRESHOLD:
+        # The question's subject is not in the documents at all: generic
+        # matches (penalty/late/delivery) must not rescue a question
+        # about something the corpus never mentions (quantum computers).
         retrieved = []
     if not retrieved:
         q = models.Question(user_id=user.id, question=question, answer_json=json.dumps(

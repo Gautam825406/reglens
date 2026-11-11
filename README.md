@@ -15,7 +15,7 @@ If the evidence is not in the documents, it says so plainly.
 | --- | --- | --- |
 | **Backend** | [`backend/`](backend/) | Python 3.11+ · FastAPI + Pydantic · SQLAlchemy · pytest |
 | **Frontend** | [`frontend/`](frontend/) | Vite + React + TypeScript |
-| Eval harness | `backend/evals/` (+ copy of golden set in `evals/`) | 47-case golden set, four-way ablation |
+| Eval harness | `backend/evals/` (+ copy of golden set in `evals/`) | 48-case golden set, four-way ablation |
 
 The two communicate **only over the REST API** (frontend → backend via
 `VITE_API_URL`). No backend code lives in `frontend/`, no frontend code in
@@ -84,7 +84,7 @@ audit. The vector hash-embeddings and graph edges are derived stores,
 rebuildable from PostgreSQL + the original documents. See
 [`docs/architecture.md`](docs/architecture.md).
 
-## Evaluation — real numbers, golden-v1, 47 cases (11 Nov 2026)
+## Evaluation — real numbers, golden-v1.1, 48 cases (11 Nov 2026)
 
 Run it yourself: `cd backend && python -m evals.run_eval` (writes
 `backend/evals/results.json`). Mode: **extractive (no LLM)** — no Groq key
@@ -93,28 +93,40 @@ the real retrieval + faithfulness code.
 
 | Retrieval mode | Precision@5 | Recall@5 | MRR | Faithfulness | Answer relevancy | Correct abstention |
 | --- | --- | --- | --- | --- | --- | --- |
-| vector-only | 0.205 | 0.782 | 0.626 | 0.846 | 0.453 | 0.875 |
-| vector+BM25 | 0.226 | 0.872 | 0.679 | 0.949 | 0.520 | 0.875 |
-| hybrid+rerank | 0.226 | 0.872 | 0.682 | 0.949 | 0.518 | 0.875 |
-| hybrid+graph | 0.231 | 0.897 | 0.720 | 0.949 | 0.520 | 0.875 |
+| vector-only | 0.273 | 0.782 | 0.660 | 0.923 | 0.489 | 1.000 |
+| vector+BM25 | 0.283 | 0.872 | 0.707 | 0.949 | 0.519 | 1.000 |
+| hybrid+rerank | 0.291 | 0.872 | 0.709 | 0.949 | 0.509 | 1.000 |
+| hybrid+graph | 0.298 | 0.897 | 0.735 | 0.974 | 0.526 | 1.000 |
 
 Per-category context recall (hybrid+graph): single-clause 1.0,
 cross-document 1.0, conflict 1.0, temporal 0.8.
 
 **Honest reading:** BM25 adds the most (recall@5 0.782 → 0.872); the
-re-ranker adds a little MRR (0.679 → 0.682); the graph adds the rest
-(MRR 0.682 → 0.720, recall@5 0.872 → 0.897) — on this 34-clause demo
+re-ranker adds a little MRR (0.707 → 0.709); the graph adds the rest
+(MRR 0.709 → 0.735, recall@5 0.872 → 0.897) — on this 34-clause demo
 corpus the deltas are small, and the graph's real value is temporal
 handling (superseded clauses are excluded from retrieval) and the
 conflict candidates, not a large recall jump. Precision@5 is low in
 absolute terms because each question has only 1–2 expected clauses
-against 5 retrieved. Abstention is 7/8: the one failure asks which
-court has jurisdiction over the Supply Agreement and is answered from
-the MSA's governing-law clause (topically about jurisdiction, wrong
-document). The temporal miss asks when the MSA expires — the clause
-says “remain in effect until 31 December 2026”, a paraphrase keyword
-retrieval cannot catch; sentence-transformer embeddings are the
-documented fix.
+against 5 retrieved; it rose after the document-scope filter, which
+removes wrong-document clauses from the retrieved set. Abstention is
+9/9. The 9th abstention case was added after a live failure:
+“penalty for late delivery of quantum computers” was answered at 0.98
+confidence from penalty/late-delivery clauses although quantum
+computers appear nowhere in the corpus. It now abstains via the
+novel-share guard (see `retrieval.py`: if more than half of what
+makes a question distinctive is absent from every accessible clause,
+the question's subject is not in the documents). The jurisdiction
+case that used to fail is now fixed by the document-scope filter (a
+question naming a document is answered from that document and its
+amendments only). The one remaining known weakness is an answerable
+question the system abstains on: “is there a conflict between the
+termination penalties across the contracts?” — a cross-document
+comparison the extractive path cannot express, so it abstains (the
+Conflicts section surfaces that conflict instead). The temporal miss
+asks when the MSA expires — the clause says “remain in effect until
+31 December 2026”, a paraphrase keyword retrieval cannot catch;
+sentence-transformer embeddings are the documented fix.
 
 ## LLM mode (Groq) — verified live, 11 Nov 2026
 
@@ -134,24 +146,28 @@ question abstained with no leak. The faithfulness gate still
 applies in LLM mode: an LLM answer that fails it falls back to
 extractive quoting of the same clauses.
 
-LLM-mode ablation on the same 47-case golden set
+LLM-mode ablation on the same 48-case golden set
 (`backend/evals/results-llm.json`; the eval scores the real generated
 answers when a key is set, extractive answers otherwise):
 
 | Retrieval mode | Precision@5 | Recall@5 | MRR | Faithfulness | Answer relevancy | Correct abstention |
 | --- | --- | --- | --- | --- | --- | --- |
-| vector-only | 0.205 | 0.782 | 0.626 | 0.590 | 0.441 | 0.875 |
-| vector+BM25 | 0.226 | 0.872 | 0.679 | 0.897 | 0.503 | 0.875 |
-| hybrid+rerank | 0.226 | 0.872 | 0.682 | 0.897 | 0.518 | 0.875 |
-| hybrid+graph | 0.231 | 0.897 | 0.720 | 0.923 | 0.503 | 0.875 |
+| vector-only | 0.273 | 0.782 | 0.660 | 0.718 | 0.433 | 1.000 |
+| vector+BM25 | 0.283 | 0.872 | 0.707 | 0.897 | 0.526 | 1.000 |
+| hybrid+rerank | 0.291 | 0.872 | 0.709 | 0.897 | 0.472 | 1.000 |
+| hybrid+graph | 0.298 | 0.897 | 0.735 | 0.897 | 0.518 | 1.000 |
 
-**Honest reading:** LLM faithfulness (hybrid+graph 0.923) is slightly
-*below* extractive quoting (0.949) — generation paraphrases, and the
+**Honest reading:** LLM faithfulness (hybrid+graph 0.897) is slightly
+*below* extractive quoting (0.974) — generation paraphrases, and the
 lexical faithfulness check scores paraphrase lower than direct quotes.
-The gap is largest where retrieval is weakest: vector-only collapses
-to 0.590 in LLM mode vs 0.846 extractive. In other words, retrieval
-quality matters more once a generator is in the loop, which is exactly
-what the hybrid+graph pipeline is for.
+LLM faithfulness also varies run to run (±0.025 observed across two
+runs on the same set), so treat the second decimal as noise. Correct
+abstention is 9/9 in LLM mode: the abstention gates run before
+generation, so they protect both modes. The gap is largest where
+retrieval is weakest: vector-only collapses to 0.718 in LLM mode vs
+0.923 extractive. In other words, retrieval quality matters more once
+a generator is in the loop, which is exactly what the hybrid+graph
+pipeline is for.
 
 Implementation note: the Groq client sends a browser User-Agent
 (Groq's edge 403s non-browser UAs), verifies TLS against the system

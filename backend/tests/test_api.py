@@ -41,6 +41,49 @@ def test_unanswerable_abstains(client):
     assert q.json()["citations"] == []
 
 
+def test_novel_topic_abstains_despite_generic_matches(client):
+    # Live failure 11 Nov 2026: "penalty for late delivery of quantum
+    # computers" was answered at 0.98 confidence from penalty /
+    # late-delivery clauses, although quantum computers appear nowhere
+    # in the corpus. Generic matches must not rescue a question whose
+    # subject is absent from every document.
+    admin = _seeded_admin(client)
+    h = auth_headers(admin["token"])
+    q = client.post("/api/ask", headers=h, json={
+        "question": "What is the penalty for late delivery of quantum computers?"})
+    assert q.status_code == 200
+    body = q.json()
+    assert body["status"] == "abstained", body
+    assert body["citations"] == []
+    # The neighbouring answerable question must still answer.
+    q2 = client.post("/api/ask", headers=h, json={
+        "question": "What is the termination penalty in the vendor agreement?"})
+    assert q2.json()["status"] in ("answered", "narrowed"), q2.json()
+    assert "2,50,000" in q2.json()["answer"]
+
+
+def test_document_scope_answers_from_named_document_only(client):
+    # A question naming the IT Services Agreement must be answered from
+    # that agreement only — not mixed with the MSA amendment's penalty —
+    # and a question about the Supply Agreement's jurisdiction (which it
+    # has no clause for) must abstain rather than quote the MSA's
+    # governing-law clause.
+    admin = _seeded_admin(client)
+    h = auth_headers(admin["token"])
+    q = client.post("/api/ask", headers=h, json={
+        "question": "What termination penalty does the IT Services Agreement impose on Acme Corp?"})
+    body = q.json()
+    assert body["status"] in ("answered", "narrowed"), body
+    assert "15,00,000" in body["answer"], body
+    assert "2,50,000" not in body["answer"], body
+    assert body["citations"], body
+    assert all("IT Services Agreement" in c["document_title"] for c in body["citations"]), body
+    q2 = client.post("/api/ask", headers=h, json={
+        "question": "Which court has jurisdiction over the Supply Agreement?"})
+    assert q2.json()["status"] == "abstained", q2.json()
+    assert q2.json()["citations"] == []
+
+
 def test_restricted_collection_leaks_nothing(client):
     admin = _seeded_admin(client)
     viewer = register(client, "Viewer", "viewer@test.local")

@@ -204,7 +204,12 @@ def retrieve(db: Session, user, question: str, collection_ids: list[str] | None 
     out = []
     for total, c, trace, overlap in ranked[:top_k]:
         d = doc_by_id[c.document_id]
-        toks = set(tokenize(c.heading + " " + c.text))
+        # Coverage counts the document title too: a question naming its
+        # document ("Which law governs the Master Services Agreement?")
+        # matches title words that live in the title, not the clause
+        # text. Without them, doc-named questions score artificially
+        # low and the gate over-abstains on answerable questions.
+        toks = set(tokenize(d.title + " " + c.heading + " " + c.text))
         coverage = round(sum(idf[t] for t in set(q_terms) if t in toks) / total_idf, 3)
         out.append({
             "clause_id": c.id, "document_id": c.document_id, "document_title": d.title,
@@ -225,3 +230,89 @@ ABSTAIN_TOP_SCORE_THRESHOLD = 0.30
 # below this also abstains: the question's distinctive terms appear in
 # no retrieved clause (e.g. "force majeure" in a corpus that has none).
 ABSTAIN_COVERAGE_THRESHOLD = 0.40
+# Novel-share above this also abstains: more than half of what makes the
+# question distinctive (IDF-weighted) is absent from EVERY accessible
+# clause. Generic matches must not rescue a question whose actual
+# subject is not in the documents — e.g. "penalty for late delivery of
+# quantum computers" matches penalty/late/delivery clauses at 0.49
+# coverage, but "quantum"/"computer" appear nowhere, so the honest
+# answer is abstention. Measured on golden-v1.1 + the live quantum
+# question: answerable cases that pass the coverage gate sit at or
+# below 0.48 novel share; the quantum case sits at 0.51.
+ABSTAIN_NOVEL_SHARE_THRESHOLD = 0.50
+
+
+def question_novelty(db: Session, user, question: str, collection_ids: list[str] | None = None) -> float:
+    """IDF share of the question's terms that appear in no accessible
+    clause (df == 0 over the allowed corpus; df is over clause
+    heading+text, the same universe as the coverage IDF). Same access
+    filter as retrieve(), so the gate and the ranking always agree on
+    what the user may see. 0.0 when the question has no content terms
+    or the user can access no clauses."""
+    allowed = allowed_collection_ids(db, user)
+    if collection_ids:
+        allowed &= set(collection_ids)
+    docs = db.query(models.Document).filter(
+        models.Document.collection_id.in_(list(allowed)) if allowed else models.Document.id == "__none__",
+        models.Document.status == "ready",
+    ).all()
+    allowed_doc_ids = {d.id for d in docs}
+    if not allowed_doc_ids:
+        return 0.0
+    clauses = db.query(models.Clause).filter(
+        models.Clause.document_id.in_(list(allowed_doc_ids)),
+        models.Clause.is_current.is_(True),
+    ).all()
+    if not clauses:
+        return 0.0
+    q_terms = list(dict.fromkeys(tokenize(question)))
+    if not q_terms:
+        return 0.0
+    clause_tokens = [set(tokenize(c.heading + " " + c.text)) for c in clauses]
+    n_docs = len(clauses)
+    total_idf = 0.0
+    novel_idf = 0.0
+    for t in q_terms:
+        df = sum(1 for toks in clause_tokens if t in toks)
+        w = math.log((n_docs + 1) / (df + 0.5)) + 1.0
+        total_idf += w
+        if df == 0:
+            novel_idf += w
+    return round(novel_idf / total_idf, 3) if total_idf else 0.0
+
+
+def _doc_phrase(title: str) -> str:
+    """Distinctive title phrase used to detect a question naming a
+    document: the title up to the " — " separator, parentheticals
+    stripped, lowercased (e.g. "master services agreement")."""
+    head = (title or "").split("—")[0]
+    head = re.sub(r"\([^)]*\)", "", head)
+    return re.sub(r"\s+", " ", head).strip().lower()
+
+
+def apply_document_scope(db: Session, question: str, retrieved: list[dict]) -> list[dict]:
+    """If the question distinctly names one or more documents (their
+    title phrases appear in it), keep only clauses from those documents
+    and from documents amending them (title containment, e.g.
+    "Amendment No. 1 to Master Services Agreement" amends the MSA). A
+    question about the Supply Agreement must not be answered from the
+    MSA's governing-law clause, and a question about the IT Services
+    penalty must not mix in the MSA amendment's figure. Returns the
+    input unchanged when no document is named. Limitation: an amending
+    document whose title does not name the amended agreement (e.g. a
+    "Side Letter") is not recognised as an amendment and is excluded."""
+    if not retrieved:
+        return retrieved
+    q = (question or "").lower()
+    docs = db.query(models.Document).all()
+    phrases = {d.id: _doc_phrase(d.title) for d in docs}
+    titles = {d.id: (d.title or "").lower() for d in docs}
+    named = {did for did, ph in phrases.items() if ph and ph in q}
+    if not named:
+        return retrieved
+    allowed = set(named)
+    for d in docs:
+        for nid in named:
+            if phrases[nid] and phrases[nid] in titles[d.id]:
+                allowed.add(d.id)
+    return [r for r in retrieved if r["document_id"] in allowed]

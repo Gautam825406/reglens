@@ -17,7 +17,7 @@ from app.database import SessionLocal, init_db  # noqa: E402
 from app import models  # noqa: E402
 from app.faithfulness import check_answer  # noqa: E402
 from app.generation import extractive_answer, generate_answer  # noqa: E402
-from app.retrieval import ABSTAIN_COVERAGE_THRESHOLD, ABSTAIN_TOP_SCORE_THRESHOLD, retrieve  # noqa: E402
+from app.retrieval import ABSTAIN_COVERAGE_THRESHOLD, ABSTAIN_NOVEL_SHARE_THRESHOLD, ABSTAIN_TOP_SCORE_THRESHOLD, apply_document_scope, question_novelty, retrieve  # noqa: E402
 from app.seed import seed_demo  # noqa: E402
 
 GOLDEN_PATH = os.path.join(os.path.dirname(__file__), "golden.json")
@@ -68,10 +68,14 @@ def run_all(db=None, user=None, out_path=None) -> dict:
         for case in cases:
             expected = resolve_expected(db, case)
             retrieved = retrieve(db, admin, case["question"], top_k=5, modes=modes)
+            retrieved = apply_document_scope(db, case["question"], retrieved)
             got = {r["clause_id"] for r in retrieved}
             top_score = retrieved[0]["score"] if retrieved else 0.0
             best_coverage = max((r.get("coverage", 0) for r in retrieved[:3]), default=0.0)
-            abstained = top_score < ABSTAIN_TOP_SCORE_THRESHOLD or best_coverage < ABSTAIN_COVERAGE_THRESHOLD
+            novel_share = question_novelty(db, admin, case["question"])
+            abstained = (top_score < ABSTAIN_TOP_SCORE_THRESHOLD
+                         or best_coverage < ABSTAIN_COVERAGE_THRESHOLD
+                         or novel_share > ABSTAIN_NOVEL_SHARE_THRESHOLD)
             if case.get("abstain"):
                 abst_correct.append(1.0 if abstained else 0.0)
                 continue
@@ -119,6 +123,7 @@ def run_all(db=None, user=None, out_path=None) -> dict:
         if not expected:
             continue
         retrieved = retrieve(db, admin, case["question"], top_k=8, modes=("vector", "bm25", "graph", "rerank"))
+        retrieved = apply_document_scope(db, case["question"], retrieved)
         got = {r["clause_id"] for r in retrieved}
         cat_recall.setdefault(case["category"], []).append(len(got & expected) / len(expected))
     per_category = {k: round(sum(v) / len(v), 3) for k, v in sorted(cat_recall.items())}
