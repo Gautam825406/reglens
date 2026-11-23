@@ -19,8 +19,13 @@ export async function api(path: string, opts: RequestInit = {}): Promise<any> {
   }
   const res = await fetch(`${API_URL}${path}`, { ...opts, headers });
   if (res.status === 401) {
+    // Only a request that carried a token can have an expired session.
+    // A login attempt carries no token, so its 401 means wrong
+    // email/password — fall through and show the backend's real message
+    // ("Invalid login credentials") instead of a misleading one.
+    const hadToken = Boolean(t);
     setToken(null);
-    throw new Error("Session expired — please sign in again.");
+    if (hadToken) throw new Error("Session expired — please sign in again.");
   }
   const text = await res.text();
   let data: any = null;

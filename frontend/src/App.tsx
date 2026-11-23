@@ -175,6 +175,7 @@ function Auth({ onAuthed, goLanding }: { onAuthed: (u: any) => void; goLanding: 
       <div className="logo" style={{ fontSize: 26 }}>Reg<span>Lens</span></div>
       <h1 style={{ marginTop: 16 }}>{mode === "login" ? "Sign in" : mode === "register" ? "Create account" : mode === "forgot" ? "Forgot password" : "Reset password"}</h1>
       <p className="muted small">The first account registered on a fresh system becomes Admin.</p>
+      <p className="small">Demo login: <strong>demo@reglens.demo</strong> / <strong>Demo@1234</strong> <span className="muted">(viewer — synthetic demo data only)</span></p>
       <form onSubmit={submit} className="grid" style={{ marginTop: 16 }}>
         {mode === "register" && <input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} required />}
         <input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
