@@ -62,7 +62,7 @@ function Landing({ onStart, onLogin }: { onStart: () => void; onLogin: () => voi
       </div></header>
 
       <section className="hero">
-        <span className="badge">AI-Powered Contract Intelligence</span>
+        <span className="eyebrow">Contract intelligence — citation-grounded</span>
         <h1 style={{ marginTop: 14 }}>Understand Every Clause.<br />Trust Every Answer.</h1>
         <p className="muted" style={{ fontSize: 18, maxWidth: 640 }}>
           RegLens reads contracts, policies and regulatory circulars as a structured knowledge
